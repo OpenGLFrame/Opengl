@@ -121,6 +121,64 @@ Example::Example(const char * class_name) : GLApplication(class_name)
 
 }
 
+
+void Example::DrawBackground()
+{
+	float r = 6.0;
+	glPushMatrix();
+	glTranslatef(0.0,0.0,-15.0);
+		glBindTexture(GL_TEXTURE_2D, Texture.ID);                      /**< 绑定纹理 */
+		/** 开始绘制四边形 */
+		glBegin(GL_QUADS);												
+			/// 前侧面
+			glNormal3f( 0.0f, 0.0f, 1.0f);								/**< 指定法线指向观察者 */
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(-r, -r,  r);	
+			glTexCoord2f(1.0f, 0.0f); glVertex3f( r, -r,  r);	
+			glTexCoord2f(1.0f, 1.0f); glVertex3f( r,  r,  r);	
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(-r,  r,  r);	
+			/// 后侧面
+			glNormal3f( 0.0f, 0.0f,-1.0f);								/**< 指定法线背向观察者 */
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(-r, -r, -r);	
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(-r,  r, -r);	
+			glTexCoord2f(0.0f, 1.0f); glVertex3f( r,  r, -r);	
+			glTexCoord2f(0.0f, 0.0f); glVertex3f( r, -r, -r);	
+			/// 顶面
+			glNormal3f( 0.0f, 1.0f, 0.0f);								/**< 指定法线向上 */
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(-r,  r, -r);	
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(-r,  r,  r);	
+			glTexCoord2f(1.0f, 0.0f); glVertex3f( r,  r,  r);	
+			glTexCoord2f(1.0f, 1.0f); glVertex3f( r,  r, -r);	
+			/// 底面
+			glNormal3f( 0.0f,-1.0f, 0.0f);								/**< 指定法线朝下 */
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(-r, -r, -r);	
+			glTexCoord2f(0.0f, 1.0f); glVertex3f( r, -r, -r);	
+			glTexCoord2f(0.0f, 0.0f); glVertex3f( r, -r,  r);	
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(-r, -r,  r);	
+			/// 右侧面
+			glNormal3f( 1.0f, 0.0f, 0.0f);								/**< 指定法线朝右 */
+			glTexCoord2f(1.0f, 0.0f); glVertex3f( r, -r, -r);	
+			glTexCoord2f(1.0f, 1.0f); glVertex3f( r,  r, -r);	
+			glTexCoord2f(0.0f, 1.0f); glVertex3f( r,  r,  r);	
+			glTexCoord2f(0.0f, 0.0f); glVertex3f( r, -r,  r);	
+			/// 左侧面
+			glNormal3f(-1.0f, 0.0f, 0.0f);								/**< 指定法线朝左 */
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(-r, -r, -r);	
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(-r, -r,  r);	
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(-r,  r,  r);	
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(-r,  r, -r);	
+		glEnd();
+
+	GLUquadricObj *quadPlanetstar = gluNewQuadric();  //创建一个二次曲面物体
+	gluQuadricTexture(quadPlanetstar,GL_TRUE); //启动该二次曲面的纹理
+	glBindTexture(GL_TEXTURE_2D,5); //绑定纹理
+	//gluSphere(quadPlanetstar, 3.0 ,20,16);//绘制一个球体
+
+	gluDeleteQuadric(quadPlanetstar);  //删除二次曲面对象
+
+	glPopMatrix();
+}
+
+
 void Example::AStar()  
 {  
 
@@ -292,6 +350,27 @@ bool Example::LoadTexture()
 		Texture.imageHeight, GL_RGB, GL_UNSIGNED_BYTE,
 		Texture.image);
 	
+	//star
+	if(!Texture.LoadBitmap("nightsky.bmp"))              /**< 载入位图文件 */
+	{
+		MessageBox(NULL,"装载位图文件03失败！","错误",MB_OK);  /**< 如果载入失败则弹出对话框 */
+		return false;
+	}
+	//glTexEnvi(GL_POINT_SPRITE,GL_COORD_REPKACE,GL_TRUE);
+	glGenTextures(1, &Texture.ID);        /**< 生成一个纹理对象名称 */
+	glBindTexture(GL_TEXTURE_2D, Texture.ID); /**< 创建纹理对象 */
+	/** 控制滤波 */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+
+	/** 创建纹理 */
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, Texture.imageWidth,
+		Texture.imageHeight, GL_RGB, GL_UNSIGNED_BYTE,
+		Texture.image);
+
+
 	glDisable(GL_TEXTURE_2D);
 	return true;
 }
@@ -323,6 +402,7 @@ void Example::Draw()
 	//  glDisable(GL_BLEND);		           /**< 关闭混合 */
 	// glPopMatrix();
 
+	DrawBackground();
 	DrawSun(0.5);
 	DrawStars();
 

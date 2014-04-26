@@ -19,7 +19,7 @@ public:
 	void    DrawBox(float r);                                     /**< 绘制一个盒子 */
 
 	void DrawSun(float sr);
-
+	void DrawBackground();
 	void DrawStars();
 	void AStar();
 
